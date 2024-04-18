@@ -40,21 +40,29 @@ class Triangle {
         glUseProgram(sP.shaderProgram)
         glBindVertexArray(vao)
         glDrawArrays(GL_TRIANGLES, 0, 3)
+        glBindVertexArray(0)
     }
 
     fun initializeShaderProgram() {
         val vaoBuffer: IntBuffer = MemoryUtil.memAllocInt(1)
         glGenVertexArrays(vaoBuffer)
         vao = vaoBuffer.get(0)
+        glBindVertexArray(vao)
         MemoryUtil.memFree(vaoBuffer)
 
+        val vboBuffer: IntBuffer = MemoryUtil.memAllocInt(1)
+        glGenBuffers(vboBuffer)
+        vbo = vboBuffer.get(0)
         glBindBuffer(GL_ARRAY_BUFFER, vbo)
         val floatBuffer = MemoryUtil.memAllocFloat(vertices.size).put(vertices).flip()
         glBufferData(GL_ARRAY_BUFFER, floatBuffer, GL_STATIC_DRAW)
         MemoryUtil.memFree(floatBuffer)
+        MemoryUtil.memFree(vboBuffer)
 
         glVertexAttribPointer(0, 3, GL_FLOAT, false, 3 * 4, 0L)
         glEnableVertexAttribArray(0)
+
+        glBindVertexArray(0)
 
         sP = ShaderProgram()
     }
