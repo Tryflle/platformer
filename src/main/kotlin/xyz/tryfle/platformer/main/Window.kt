@@ -76,6 +76,10 @@ object Window {
         glfwSetCursorPosCallback(handle, mouseHandler::handleCursorPos)
         createCapabilities()
 
+        glfwSetFramebufferSizeCallback(handle) { _, width, height ->
+            glViewport(0, 0, width, height)
+        }
+
         Game.postInit()
     }
 }

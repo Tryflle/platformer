@@ -13,24 +13,40 @@ class Triangle {
 
     private var x: Float = 0f
     private var y: Float = 0f
-    private var speed: Float = 5f
+    private var speed: Float = 0.1f
     private var vbo: Int = 0
     private var vao: Int = 0
     private lateinit var sP: ShaderProgram
-    private val vertices: FloatArray = floatArrayOf(
-        0.0f, 0.5f, 0.0f,
+    private var vertices: FloatArray = floatArrayOf(
+        0.5f,  0.5f, 0.0f,
         0.5f, -0.5f, 0.0f,
-        -0.5f, -0.5f, 0.0f
+        -0.5f,  0.5f, 0.0f,
+
+        0.5f, -0.5f, 0.0f,
+        -0.5f, -0.5f, 0.0f,
+        -0.5f,  0.5f, 0.0f
     )
 
     @Subscribe
     fun onKey(e: KeyboardEvent) {
         if (e.action == GLFW.GLFW_PRESS) {
             when (e.key) {
-                GLFW.GLFW_KEY_W -> x -= speed
-                GLFW.GLFW_KEY_A -> x += speed
-                GLFW.GLFW_KEY_S -> y += speed
-                GLFW.GLFW_KEY_D -> x += speed
+                GLFW.GLFW_KEY_W -> {
+                    y += speed
+                    updateVertices(0f, speed)
+                }
+                GLFW.GLFW_KEY_A -> {
+                    x -= speed
+                    updateVertices(-speed, 0f)
+                }
+                GLFW.GLFW_KEY_S -> {
+                    y -= speed
+                    updateVertices(0f, -speed)
+                }
+                GLFW.GLFW_KEY_D -> {
+                    x += speed
+                    updateVertices(speed, 0f)
+                }
             }
         }
     }
@@ -39,8 +55,19 @@ class Triangle {
     fun render(e: GameLoopEvent) {
         glUseProgram(sP.shaderProgram)
         glBindVertexArray(vao)
-        glDrawArrays(GL_TRIANGLES, 0, 3)
+        glDrawArrays(GL_TRIANGLES, 0, 6)
         glBindVertexArray(0)
+    }
+
+    private fun updateVertices(dx: Float, dy: Float) {
+        for (i in vertices.indices step 3) {
+            vertices[i] += dx
+            vertices[i + 1] += dy
+        }
+        glBindBuffer(GL_ARRAY_BUFFER, vbo)
+        val floatBuffer = MemoryUtil.memAllocFloat(vertices.size).put(vertices).flip()
+        glBufferData(GL_ARRAY_BUFFER, floatBuffer, GL_STATIC_DRAW)
+        MemoryUtil.memFree(floatBuffer)
     }
 
     fun initializeShaderProgram() {
